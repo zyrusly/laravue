@@ -19,7 +19,7 @@ instance.interceptors.response.use(
   (error: AxiosError) => {
     if (error.response && error.response.status === 401) {
       sessionStorage.removeItem('user')
-      window.location.reload()
+      // window.location.reload()
     }
 
     return Promise.reject(error)

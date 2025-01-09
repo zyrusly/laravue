@@ -62,7 +62,7 @@
         <br />
         <label for="roleId">Role ID:</label> <br />
         <select v-model="selectedUser.role_id">
-          <option value="null"><i>No Role Selected</i></option>
+          <option value="null">No Role Selected</option>
           <option v-for="role in roles" :key="role.id" :value="role.id">{{ role.name }}</option>
         </select>
         <br />

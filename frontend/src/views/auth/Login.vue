@@ -1,11 +1,15 @@
 <template>
   <div>
     <h3>Login</h3>
-    <p v-if="loading">loading...</p>
-    <p v-if="error" style="color: red">{{ error }}</p>
-    <input type="text" placeholder="Email" v-model="user.email" /><br />
-    <input type="password" placeholder="Password" v-model="user.password" /><br />
-    <button @click="login">Login</button>
+    <form @submit.prevent="login">
+      <p v-if="loading">Loading...</p>
+      <p v-if="error" style="color: red">{{ error }}</p>
+      <template v-else>
+        <input type="email" placeholder="Email" v-model="user.email" required /><br />
+        <input type="password" placeholder="Password" v-model="user.password" required /><br />
+        <button type="submit" :disabled="loading">Login</button>
+      </template>
+    </form>
   </div>
 </template>
 
@@ -36,7 +40,15 @@ export default defineComponent({
         await authStore.login(user)
         await router.push({ name: 'home' })
       } catch (err) {
-        error.value = (err as any).message || 'An error occurred'
+        if (
+          (err as any).response &&
+          (err as any).response.data &&
+          (err as any).response.data.message
+        ) {
+          error.value = (err as any).response.data.message
+        } else {
+          error.value = (err as any).message || 'An error occurred'
+        }
       } finally {
         loading.value = false
       }
