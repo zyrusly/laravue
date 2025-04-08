@@ -22,7 +22,6 @@ class UserController extends Controller
 
     public function store(UserRequest $request)
     {
-        //IF REQUEST HAS ID UPDATE, OTHERWISE CREATE
         info($request);
         try {
             if ($request['id'] == null) {

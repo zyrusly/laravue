@@ -1,60 +1,71 @@
-// stores/auth.ts
 import { defineStore } from 'pinia'
-import repository from '@/api/repository'
+import { ref, computed, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import repository from '@/api/repository' // adjust path if needed
 
 interface User {
   id: number
   name: string
   email: string
 }
+export const useAuthStore = defineStore('auth', () => {
+  const router = useRouter()
 
-export const useAuthStore = defineStore('auth', {
-  state: () => ({
-    user: sessionStorage.getItem('user')
-      ? JSON.parse(sessionStorage.getItem('user') as string)
-      : (null as User | null),
-    loading: false as boolean,
-    error: false as string | boolean,
-  }),
+  const storedUser = sessionStorage.getItem('user')
+  const user = ref<User | null>(storedUser ? JSON.parse(storedUser) : null)
+  const loading = ref(false)
+  const error = ref<string | null>(null)
 
-  getters: {
-    authenticated: (state) => state.user !== null,
-  },
+  const authenticated = computed(() => user.value !== null)
 
-  actions: {
-    async login(user: any) {
-      try {
-        this.loading = true
-        await repository.createSession()
-        const { data } = await repository.login(user)
-        this.setUser(data)
-        console.log(data)
+  async function login(credentials: any) {
+    loading.value = true
+    error.value = null
+    try {
+      await repository.createSession()
+      const { data } = await repository.login(credentials)
+      if (data.error) {
+        error.value = data.error
+      } else {
+        setUser(data)
         sessionStorage.setItem('user', JSON.stringify(data))
-        window.location.reload()
-      } catch (error) {
-        console.log(error)
-        this.error = (error as any).message || 'An error occurred'
-      } finally {
-        this.loading = false
       }
-    },
+    } catch (err: any) {
+      console.error(err)
+      error.value = err?.message || 'An error occurred'
+    } finally {
+      loading.value = false
+    }
+  }
 
-    async logout() {
-      try {
-        this.loading = true
-        await repository.logout()
-        this.setUser(null)
-        sessionStorage.removeItem('user')
-        window.location.reload()
-      } catch (error) {
-        this.error = (error as any).message || 'An error occurred'
-      } finally {
-        this.loading = false
-      }
-    },
+  async function logout() {
+    loading.value = true
+    error.value = null
+    try {
+      await repository.logout()
+      setUser(null)
+      sessionStorage.removeItem('user')
+      window.location.reload() // reload the page to update the UI
+      router.push({ name: 'Login' }) // redirect to login page
+    } catch (err: any) {
+      error.value = err?.message || 'An error occurred'
+    } finally {
+      loading.value = false
+    }
+  }
 
-    setUser(user: User | null) {
-      this.user = user
-    },
-  },
+  function setUser(u: User | null) {
+    user.value = u
+  }
+
+
+  return {
+    user,
+    loading,
+    error,
+    authenticated,
+    login,
+    logout,
+    setUser,
+  }
 })

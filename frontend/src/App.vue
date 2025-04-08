@@ -1,21 +1,22 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <div style="display: flex; justify-content: space-evenly; width: 100%">
-        <router-link v-if="!authenticated" :to="{ name: 'login' }">Login</router-link>
-        <router-link v-if="authenticated" :to="{ name: 'home' }">Home</router-link>
-        <button v-if="authenticated" @click="logout">logout</button>
-        <button v-if="authenticated" @click="showModal('user')">Create User</button>
-        <button v-if="authenticated" @click="showModal('role')">Create Role</button>
-        <br />
+    <div id="nav" v-once>
+      <div class="nav-container">
+        <!-- <router-link v-if="!authenticated" :to="{ name: 'login' }">Login</router-link> -->
+        <router-link v-if="authenticated" :to="{ name: 'home' }" class="home">Home</router-link>
+        <div v-if="authenticated">
+          <button  @click="showModal('user')" class="nav-btn">Create User </button> |
+          <button  @click="showModal('role')" class="nav-btn">Create Role </button> |
+          <button @click="logout" class="nav-btn">Logout</button>
+        </div>
       </div>
       <br />
       <p v-if="loading">loading...</p>
       <p v-if="error" style="color: red">{{ error }}</p>
     </div>
     <router-view />
-    <div style="display: flex; justify-content: space-evenly">
-      <div v-if="isUserModalOpen" class="modal">
+    <div style="display: flex; justify-content: space-evenly; ">
+      <div v-show="isUserModalOpen" class="modal">
         <br />
         <form @submit.prevent="createUser">
           <label for="email">Email:</label>
@@ -52,7 +53,7 @@
         </form>
       </div>
 
-      <div v-if="isRoleModalOpen" class="modal">
+      <div v-show="isRoleModalOpen" class="modal">
         <br />
         <form @submit.prevent="createRole">
           <label for="name">Name:</label>
@@ -80,7 +81,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue'
+import { defineComponent, ref, onMounted, reactive } from 'vue'
 import { useAuthStore } from '@/store/index'
 import repository from '@/api/repository'
 
@@ -90,7 +91,7 @@ export default defineComponent({
     const authStore = useAuthStore()
     const isUserModalOpen = ref(false)
     const isRoleModalOpen = ref(false)
-    const userForm = ref({
+    const userForm = reactive({
       id: null,
       email: '',
       name: '',
@@ -98,7 +99,7 @@ export default defineComponent({
       passwordConfirmation: '',
       role_id: null,
     })
-    const roleForm = ref({
+    const roleForm = reactive({
       id: null,
       name: '',
       description: '',
@@ -158,7 +159,7 @@ export default defineComponent({
 
     const createUser = async () => {
       try {
-        const { id, email, name, password, passwordConfirmation, role_id } = userForm.value
+        const { id, email, name, password, passwordConfirmation, role_id } = userForm
 
         if (password !== passwordConfirmation) {
           formError.value = 'Passwords do not match'
@@ -175,7 +176,7 @@ export default defineComponent({
 
     const createRole = async () => {
       try {
-        const { id, name, description } = roleForm.value
+        const { id, name, description } = roleForm
         await repository.createRole({ id, name, description })
         hideModal()
         window.location.reload()
@@ -214,3 +215,118 @@ export default defineComponent({
   },
 })
 </script>
+
+
+<style scoped>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  /* outline: 1px solid red */
+}
+
+#nav {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 15px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  width: 80%;
+  align-items: center;
+}
+
+.nav-container > div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.home {
+  text-decoration: none;
+  color: #1b1b1b;
+  font-size: 2rem;
+}
+
+.nav-btn {
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: transparent;
+  color: #1b1b1b;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  margin: 0 10px;
+}
+
+.nav-btn:hover {
+  font-size: 1.3rem;
+  color: #0f0f0f;
+  transition: all 0.1s ease-in-out;
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  min-width: 450px;
+}
+
+.modal > form {
+  padding: 20px;
+  width: 100%;
+}
+.modal > form > input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.modal >form > select {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.modal > form > button {
+  width: 100%;
+  padding: 10px;
+  background-color: #292929;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.modal > form > button:hover {
+  background-color: #1b1b1b;
+  transition: all 0.1s ease-in-out;
+}
+.modal > form > label {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: .9rem;
+  color: #292929;
+}
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+</style>

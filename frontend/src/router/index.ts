@@ -4,7 +4,7 @@ import routes from './routes'
 
 const router = createRouter({
   history: createWebHistory(),
-  routes: routes as RouteRecordRaw[], // TypeScript type assertion
+  routes: routes as RouteRecordRaw[], 
   scrollBehavior: () => ({ top: 0 }),
 })
 

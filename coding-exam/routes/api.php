@@ -22,7 +22,6 @@ use App\Http\Controllers\LoginController;
 // });
 
 Route::middleware(['auth:sanctum'])->group(function () {
-
     //get current user
     Route::get('get-user', function (Request $request) {
         return $request->user();
@@ -33,6 +32,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     //roles
     Route::resource('role', RoleController::class);
+
+    
 });
 
 Route::post('/login', [LoginController::class, 'login']);

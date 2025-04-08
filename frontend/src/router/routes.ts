@@ -6,6 +6,11 @@ import middleware from './middleware'
 
 const routes: RouteRecordRaw[] = [
   {
+    path: '/',
+    redirect: '/login',
+    beforeEnter: middleware.guest,
+  },
+  {
     path: '/login',
     name: 'login',
     component: Login,

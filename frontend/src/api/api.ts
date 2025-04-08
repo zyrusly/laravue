@@ -1,3 +1,4 @@
+import router from '@/router'
 import axios from 'axios'
 import type { InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
 
@@ -20,6 +21,7 @@ instance.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       sessionStorage.removeItem('user')
       // window.location.reload()
+      router.push({ name: 'Login' })
     }
 
     return Promise.reject(error)
